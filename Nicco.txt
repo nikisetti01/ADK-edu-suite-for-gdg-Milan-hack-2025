@@ -1,0 +1,85 @@
+SUGGERIMENTI VIVISSIMI PER FARE L’HACKHATON 
+
+ 
+
+CODING: 
+
+LANGCHAIN E LANGRAPH -> Fondamentali per fare applicazioni LLM come RAG o Agenti 
+
+https://www.langchain.com/ 
+
+RAG: https://python.langchain.com/docs/tutorials/rag/ 
+
+Chatbot: https://python.langchain.com/docs/tutorials/chatbot/ 
+
+Agent langchain: https://python.langchain.com/docs/integrations/tools/ 
+
+Langraph: https://github.com/langchain-ai/langgraph 
+
+GraphRAG: https://python.langchain.com/docs/integrations/retrievers/graph_rag/ 
+
+LLM Memory: https://www.pinecone.io/learn/series/langchain/langchain-conversational-memory/ 
+
+Agent and Memory: https://python.langchain.com/docs/versions/migrating_memory/long_term_memory_agent/ 
+
+Fixing the output-> Outlines: 
+
+https://python.langchain.com/docs/integrations/providers/outlines/ 
+
+Practical lessons or example: 
+
+Agentic Rag guide: https://open.substack.com/pub/decodingml/p/llmops-for-production-agentic-rag?r=54fjyw&utm_medium=ios 
+
+Example of AI Assistant : https://github.com/decodingml/second-brain-ai-assistant-course 
+
+Simple Langchain course: https://www.youtube.com/watch?v=tcqEUSNCn8I 
+
+Vector DB: 
+
+Langchain offer Faiss se qualcuno vuole provare le prime volte ma useremo  
+
+Qdrant: https://qdrant.tech/documentation/ 
+
+Qdrant langchain: https://python.langchain.com/docs/integrations/vectorstores/qdrant/ 
+
+ 
+
+API 
+
+Per l’hackhaton useremo API come chat a pagamento o se vogliono free consiglio  
+
+Groq: https://console.groq.com/home 
+
+Langchain + Groq: https://python.langchain.com/docs/integrations/chat/groq/ 
+
+ 
+
+DEVOPS 
+
+Docker penso più o meno lo conoscete vi invito a riguardarlo ma sopratutto 
+
+Docker-compose: https://docs.docker.com/compose/ 
+
+Docker + GPU : https://docs.docker.com/compose/how-tos/gpu-support/ 
+
+External Service 
+
+Heygen : Avatar, TTS and image: https://app.heygen.com/ 
+
+Alcuni tool Nvidia che non sono mai riuscito a esplorare ma se trovate qualcosa ben venga me lo dite: 
+
+https://developer.nvidia.com/maxine?sortBy=developer_learning_library%2Fsort%2Ftitle%3Aasc 
+
+https://developer.nvidia.com/merlin 
+
+https://developer.nvidia.com/rapids 
+
+https://developer.nvidia.com/ace 
+
+THE PROTOCOLS: 
+
+Se avete voglia io me li sto imparando nel tempo 
+
+A2A https://github.com/google/A2A 
+
+MCP https://github.com/modelcontextprotocol 
