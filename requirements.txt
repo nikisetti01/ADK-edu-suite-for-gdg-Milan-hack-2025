@@ -1,0 +1,33 @@
+# Core Langchain & LLM stack
+langchain
+langgraph
+openai
+tiktoken
+qdrant-client
+faiss-cpu
+
+# Memory & Retrieval
+chromadb
+pinecone-client
+sentence-transformers
+transformers
+accelerate
+
+# Dev
+python-dotenv
+uvicorn
+fastapi
+httpx
+pydantic
+
+# Async + Tooling
+aiohttp
+nest_asyncio
+
+# Optional: Groq integration
+groq
+
+# Outlines integration (for structured output)
+outlines
+
+# Docker / GPU support (setup only, not in Python)
