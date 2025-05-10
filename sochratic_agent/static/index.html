@@ -1,0 +1,1032 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Road to Goal - Calendario</title>
+    <style>
+        .progress-completed {
+        position: absolute;
+        top: 0;
+        left: 0;
+        height: 100%;
+        background-color: #3498db;
+        width: 50%; /* Ora è al 50% */
+        z-index: 2; /* Per assicurarsi che sia sopra gli altri elementi */
+        }
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+        
+        body {
+            background-color: #ffffff;
+            color: #333;
+        }
+        
+        .container {
+            display: flex;
+            height: 100vh;
+        }
+        
+        .sidebar {
+            width: 280px;
+            background-color: #f7f7f7;
+            border-right: 1px solid #e0e0e0;
+            padding-top: 10px;
+            display: flex;
+            flex-direction: column;
+        }
+        
+        .user-profile {
+            padding: 15px 20px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            border-bottom: 1px solid #e0e0e0;
+        }
+        
+        .user-name {
+            font-weight: 600;
+            color: #333;
+        }
+        
+        .dropdown-icon {
+            color: #777;
+            cursor: pointer;
+        }
+        
+        .menu-item {
+            padding: 12px 20px;
+            display: flex;
+            align-items: center;
+            cursor: pointer;
+        }
+        
+        .menu-item:hover {
+            background-color: #f0f0f0;
+        }
+        
+        .menu-item .icon {
+            width: 20px;
+            height: 20px;
+            margin-right: 15px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        
+        .counter {
+            margin-left: auto;
+            background-color: #f1f1f1;
+            border-radius: 12px;
+            padding: 2px 8px;
+            font-size: 12px;
+            color: #555;
+        }
+        
+        .counter.red {
+            background-color: #e74c3c;
+            color: white;
+        }
+        
+        .counter.yellow {
+            background-color: #f1c40f;
+            color: white;
+        }
+        
+        .main-content {
+            flex: 1;
+            padding: 20px;
+            overflow-y: auto;
+        }
+        
+        .top-bar {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 30px;
+        }
+        
+        .add-button {
+            background-color: #f7f7f7;
+            border: none;
+            width: 35px;
+            height: 35px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 24px;
+            color: #555;
+            cursor: pointer;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+        }
+        
+        .search-bar {
+            display: flex;
+            align-items: center;
+            background-color: #f7f7f7;
+            border-radius: 20px;
+            padding: 5px 15px;
+            width: 250px;
+        }
+        
+        .search-icon {
+            color: #777;
+            margin-right: 10px;
+        }
+        
+        .search-input {
+            border: none;
+            background: transparent;
+            flex: 1;
+            outline: none;
+            font-size: 14px;
+        }
+        
+        .motivational {
+            text-align: center;
+            padding: 15px;
+            margin-bottom: 20px;
+            background-color: #f7f7f7;
+            color: #333;
+            border-radius: 8px;
+            font-style: italic;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+        }
+        
+        .progress-container {
+            margin-bottom: 30px;
+        }
+        
+        .progress-bar {
+            background-color: #f1f1f1;
+            height: 25px;
+            border-radius: 5px;
+            margin-bottom: 10px;
+            overflow: hidden;
+            position: relative;
+        }
+        
+        .progress {
+            display: flex;
+            height: 100%;
+        }
+        
+    .progress-blue {
+            background-color: rgba(52, 152, 219, 0.2);
+        }
+
+        .progress-yellow {
+            background-color: rgba(241, 196, 15, 0.2);
+        }
+
+        .progress-red {
+            background-color: rgba(231, 76, 60, 0.2);
+        }
+        
+        .progress-completed {
+            position: absolute;
+            top: 0;
+            left: 0;
+            height: 100%;
+            background-color: #3498db;
+            width: 30%; /* Metà del blu completato */
+        }
+        
+        .progress-text {
+            position: absolute;
+            width: 100%;
+            text-align: center;
+            color: #333;
+            font-weight: bold;
+            top: 50%;
+            transform: translateY(-50%);
+            font-size: 14px;
+            z-index: 3;
+            text-shadow: 0px 0px 2px rgba(255, 255, 255, 0.7);
+        }
+        
+        .progress-info {
+            display: flex;
+            justify-content: space-around;
+        }
+        
+        .info-item {
+            display: flex;
+            align-items: center;
+            font-size: 13px;
+            color: #555;
+        }
+        
+        .color-box {
+            width: 12px;
+            height: 12px;
+            margin-right: 5px;
+            border-radius: 2px;
+        }
+        
+        .blue {
+            background-color: #3498db;
+        }
+        
+        .yellow {
+            background-color: #f1c40f;
+        }
+        
+        .red {
+            background-color: #e74c3c;
+        }
+        
+        .month-selector {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+        }
+        
+        .month-btn {
+            background-color: transparent;
+            border: none;
+            font-size: 18px;
+            cursor: pointer;
+            color: #555;
+            width: 30px;
+            height: 30px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        
+        .month-btn:hover {
+            background-color: #f1f1f1;
+            border-radius: 50%;
+        }
+        
+        .calendar-grid {
+            display: grid;
+            grid-template-columns: repeat(7, 1fr);
+            gap: 8px;
+        }
+        
+        .day-header {
+            text-align: center;
+            font-weight: 500;
+            padding: 8px;
+            color: #555;
+            font-size: 13px;
+        }
+        
+        .day {
+            border: 1px solid #e0e0e0;
+            border-radius: 8px;
+            height: 100px;
+            padding: 8px;
+            position: relative;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+        
+        .day:hover {
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+        }
+        
+        .day-number {
+            font-weight: 500;
+            font-size: 14px;
+            position: absolute;
+            top: 5px;
+            left: 8px;
+        }
+        
+        .day.inactive {
+            background-color: #fafafa;
+            color: #bbb;
+        }
+        
+        .day.blue {
+            background-color: rgba(52, 152, 219, 0.1);
+            border: 1px solid rgba(52, 152, 219, 0.3);
+        }
+        
+        .day.yellow {
+            background-color: rgba(241, 196, 15, 0.1);
+            border: 1px solid rgba(241, 196, 15, 0.3);
+        }
+        
+        .day.red {
+            background-color: rgba(231, 76, 60, 0.1);
+            border: 1px solid rgba(231, 76, 60, 0.3);
+        }
+        
+        .study-time {
+            margin-top: 22px;
+            font-size: 11px;
+            color: #555;
+            text-align: center;
+        }
+        
+        .empty-state {
+            display: none;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            height: 300px;
+            text-align: center;
+            color: #777;
+        }
+        
+        .empty-state img {
+            width: 120px;
+            margin-bottom: 20px;
+            opacity: 0.6;
+        }
+        
+        .empty-state h3 {
+            font-weight: 500;
+            margin-bottom: 10px;
+        }
+        
+        .empty-state p {
+            font-size: 14px;
+            max-width: 300px;
+            margin-bottom: 20px;
+        }
+        
+        .highlight {
+            position: absolute;
+            top: 5px;
+            right: 5px;
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            background-color: #e74c3c;
+        }
+        .popup-overlay {
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background-color: rgba(0, 0, 0, 0.5);
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        z-index: 1000;
+        opacity: 0;
+        visibility: hidden;
+        transition: all 0.3s ease;
+    }
+    
+    .popup-overlay.active {
+        opacity: 1;
+        visibility: visible;
+    }
+    
+    .popup-container {
+        background-color: white;
+        width: 90%;
+        max-width: 500px;
+        border-radius: 12px;
+        box-shadow: 0 5px 20px rgba(0, 0, 0, 0.15);
+        overflow: hidden;
+        transform: translateY(20px);
+        transition: all 0.3s ease;
+    }
+    
+    .popup-overlay.active .popup-container {
+        transform: translateY(0);
+    }
+    
+    .popup-header {
+        padding: 15px 20px;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        border-bottom: 1px solid #e0e0e0;
+        background-color: #f7f7f7;
+    }
+    
+    .popup-header h2 {
+        font-size: 18px;
+        font-weight: 600;
+        color: #333;
+        margin: 0;
+    }
+    
+    .close-popup {
+        background: none;
+        border: none;
+        font-size: 20px;
+        color: #777;
+        cursor: pointer;
+        width: 30px;
+        height: 30px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        border-radius: 50%;
+        transition: background-color 0.2s ease;
+    }
+    
+    .close-popup:hover {
+        background-color: #f1f1f1;
+    }
+    
+    .popup-content {
+        padding: 20px;
+    }
+    
+    .study-schedule {
+        background-color: rgba(52, 152, 219, 0.1);
+        border: 1px solid rgba(52, 152, 219, 0.3);
+        border-radius: 8px;
+        padding: 15px;
+        margin-bottom: 20px;
+    }
+    
+    .study-schedule h3 {
+        margin-top: 0;
+        margin-bottom: 12px;
+        color: #3498db;
+        font-size: 16px;
+        font-weight: 600;
+    }
+    
+    .schedule-item {
+        display: flex;
+        align-items: center;
+        margin-bottom: 8px;
+        font-size: 14px;
+        color: #555;
+    }
+    
+    .schedule-icon {
+        margin-right: 10px;
+        color: #3498db;
+    }
+    
+    .todo-section {
+        margin-top: 25px;
+    }
+    
+    .todo-section h3 {
+        margin-top: 0;
+        margin-bottom: 15px;
+        font-size: 16px;
+        font-weight: 600;
+        color: #333;
+    }
+    
+    .todo-list {
+        list-style-type: none;
+        padding: 0;
+        margin: 0;
+    }
+    
+    .todo-item {
+        display: flex;
+        align-items: center;
+        padding: 10px 0;
+        border-bottom: 1px solid #f1f1f1;
+    }
+    
+    .todo-item:last-child {
+        border-bottom: none;
+    }
+    
+    .todo-checkbox {
+        margin-right: 12px;
+        width: 18px;
+        height: 18px;
+        border: 2px solid #3498db;
+        border-radius: 4px;
+        cursor: pointer;
+        position: relative;
+    }
+    
+    .todo-checkbox.checked::after {
+        content: '✓';
+        position: absolute;
+        color: white;
+        font-size: 12px;
+        top: 50%;
+        left: 50%;
+        transform: translate(-50%, -50%);
+    }
+    
+    .todo-checkbox.checked {
+        background-color: #3498db;
+    }
+    
+    .todo-text {
+        flex: 1;
+        font-size: 14px;
+        color: #333;
+    }
+    
+    .todo-item.checked .todo-text {
+        text-decoration: line-through;
+        color: #999;
+    }
+    
+    .todo-delete {
+        margin-left: auto;
+        color: #e74c3c;
+        cursor: pointer;
+        opacity: 0.7;
+        font-size: 16px;
+        visibility: hidden;
+        width: 24px;
+        height: 24px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        border-radius: 50%;
+    }
+    
+    .todo-item:hover .todo-delete {
+        visibility: visible;
+    }
+    
+    .todo-delete:hover {
+        opacity: 1;
+        background-color: rgba(231, 76, 60, 0.1);
+    }
+    
+    .add-todo {
+        display: flex;
+        margin-top: 15px;
+        border: 1px solid #e0e0e0;
+        border-radius: 8px;
+        overflow: hidden;
+    }
+    
+    .add-todo-input {
+        flex: 1;
+        border: none;
+        padding: 10px 15px;
+        font-size: 14px;
+        outline: none;
+    }
+    
+    .add-todo-btn {
+        background-color: #3498db;
+        color: white;
+        border: none;
+        padding: 0 15px;
+        cursor: pointer;
+        font-weight: 500;
+        transition: background-color 0.2s ease;
+    }
+    
+    .add-todo-btn:hover {
+        background-color: #2980b9;
+    }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="sidebar">
+            <div class="user-profile">
+                <span class="user-name">Alessio Franchini</span>
+                <span class="dropdown-icon">▼</span>
+            </div>
+            
+            <div class="menu-item">
+                <div class="icon">📚</div>
+                <span>Libreria</span>
+                <span class="counter">1</span>
+            </div>
+            
+            <div class="menu-item">
+                <div class="icon">🗂</div>
+                <span>Mazzi Flashcards</span>
+                <span class="counter">0</span>
+            </div>
+            
+            <div class="menu-item" style="padding-left: 55px;">
+                <div class="icon">📝</div>
+                <span>Flashcards da ripassare</span>
+                <span class="counter red">0</span>
+            </div>
+            
+            <div class="menu-item" style="padding-left: 55px;">
+                <div class="icon">📝</div>
+                <span>Flashcards da iniziare</span>
+                <span class="counter red">0</span>
+            </div>
+            
+            <div class="menu-item" style="padding-left: 55px;">
+                <div class="icon">📝</div>
+                <span>Flashcards in attesa</span>
+                <span class="counter yellow">0</span>
+            </div>
+            
+            <div class="menu-item active">
+                <div class="icon">🎯</div>
+                <span>Road to Goal</span>
+            </div>
+        </div>
+        
+        <div class="main-content">
+            <div class="top-bar">
+                <button class="add-button">+</button>
+                <div class="search-bar">
+                    <span class="search-icon">🔍</span>
+                    <input type="text" class="search-input" placeholder="Cerca nei mazzi...">
+                </div>
+            </div>
+            
+            <div class="progress-container">
+                <div class="motivational" id="motivationalQuote">
+                    Sei a buon punto con il tuo studio! Continua così!
+                </div>
+                
+                <div class="progress-bar">
+                    <div class="progress">
+                        <div class="progress-blue"></div>
+                        <div class="progress-yellow"></div>
+                        <div class="progress-red"></div>
+                    </div>
+                    <div class="progress-completed"></div>
+                    <div class="progress-text">30% Completato</div>
+                </div>
+                
+                <div class="progress-info">
+                    <div class="info-item">
+                        <div class="color-box blue"></div>
+                        <span>Studio Intensivo (60%)</span>
+                    </div>
+                    <div class="info-item">
+                        <div class="color-box yellow"></div>
+                        <span>Gym (30%)</span>
+                    </div>
+                    <div class="info-item">
+                        <div class="color-box red"></div>
+                        <span>Test (10%)</span>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="month-selector">
+                <button class="month-btn" id="prevMonth">←</button>
+                <h2 id="currentMonth">Maggio 2025</h2>
+                <button class="month-btn" id="nextMonth">→</button>
+            </div>
+            
+            <div class="calendar-grid" id="calendarGrid">
+                <!-- Will be filled with JavaScript -->
+            </div>
+            
+            <div class="empty-state" id="emptyState">
+                <img src="/api/placeholder/120/120" alt="Nessun contenuto">
+                <h3>Non hai creato obiettivi!</h3>
+                <p>Crea un obiettivo cliccando sul pulsante in alto</p>
+            </div>
+        </div>
+    </div>
+
+    <div class="popup-overlay" id="dayPopup">
+    <div class="popup-container">
+        <div class="popup-header">
+            <h2>12 Maggio 2025</h2>
+            <button class="close-popup" id="closePopup">×</button>
+        </div>
+        <div class="popup-content">
+            <div class="study-schedule">
+                <h3>Programma della giornata</h3>
+                <div class="schedule-item">
+                    <span class="schedule-icon">📚</span>
+                    <span>Studio Intensivo: 8:00 - 12:00</span>
+                </div>
+                <div class="schedule-item">
+                    <span class="schedule-icon">💪</span>
+                    <span>Gym: 15:00 - 17:00</span>
+                </div>
+                <div class="schedule-item">
+                    <span class="schedule-icon">📝</span>
+                    <span>Ripasso: 18:00 - 19:30</span>
+                </div>
+            </div>
+            
+            <div class="todo-section">
+                <h3>To-Do List</h3>
+                <ul class="todo-list" id="todoList">
+                    <!-- Gli elementi della to-do list verranno aggiunti qui dinamicamente -->
+                </ul>
+                <div class="add-todo">
+                    <input type="text" class="add-todo-input" id="newTodoInput" placeholder="Aggiungi un'attività...">
+                    <button class="add-todo-btn" id="addTodoBtn">Aggiungi</button>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="exam-options" style="display: none; flex-direction: column; gap: 15px;">
+    <h3>Seleziona il tipo di esame:</h3>
+    <div style="display: flex; gap: 10px; justify-content: center;">
+        <button class="exam-btn" style="background-color: #3498db; color: white; border: none; padding: 12px 25px; border-radius: 5px; font-weight: bold; cursor: pointer; flex: 1; max-width: 150px;">Orale</button>
+        <button class="exam-btn" style="background-color: #3498db; color: white; border: none; padding: 12px 25px; border-radius: 5px; font-weight: bold; cursor: pointer; flex: 1; max-width: 150px;">Scritto</button>
+    </div>
+</div>
+</div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+    // Aggiorna barra di progresso al 50%
+    function updateProgressBar() {
+        document.querySelector('.progress-completed').style.width = '50%';
+        document.querySelector('.progress-text').textContent = '50% Completato';
+    }
+    // Variabili globali
+    let currentDate = new Date(2025, 4); // Maggio 2025 (mese è 0-indexed)
+    
+    // Motivational quotes array
+    const motivationalQuotes = [
+        "Sei a buon punto con il tuo studio! Continua così!",
+        "La costanza è la chiave del successo. Non mollare!",
+        "Ogni giorno di studio è un passo verso i tuoi obiettivi.",
+        "La fatica di oggi sarà il tuo successo di domani.",
+        "Studio e allenamento: la perfetta combinazione per una mente brillante.",
+        "I risultati arrivano a chi persevera. Forza!"
+    ];
+    
+    // Update motivational quote randomly
+    function updateMotivationalQuote() {
+        const quoteIndex = Math.floor(Math.random() * motivationalQuotes.length);
+        document.getElementById('motivationalQuote').textContent = motivationalQuotes[quoteIndex];
+    }
+    
+    // Calendar functionality
+    function updateCalendar() {
+        const calendarGrid = document.getElementById('calendarGrid');
+        calendarGrid.innerHTML = '';
+        
+        // Update motivational quote
+        updateMotivationalQuote();
+        
+        // Add day headers
+        const weekdays = ['Dom', 'Lun', 'Mar', 'Mer', 'Gio', 'Ven', 'Sab'];
+        weekdays.forEach(day => {
+            const dayHeader = document.createElement('div');
+            dayHeader.className = 'day-header';
+            dayHeader.textContent = day;
+            calendarGrid.appendChild(dayHeader);
+        });
+        
+        // Update month display
+        const monthNames = ['Gennaio', 'Febbraio', 'Marzo', 'Aprile', 'Maggio', 'Giugno', 
+                            'Luglio', 'Agosto', 'Settembre', 'Ottobre', 'Novembre', 'Dicembre'];
+        document.getElementById('currentMonth').textContent = `${monthNames[currentDate.getMonth()]} ${currentDate.getFullYear()}`;
+        
+        // Get first day of month and total days
+        const firstDay = new Date(currentDate.getFullYear(), currentDate.getMonth(), 1);
+        const lastDay = new Date(currentDate.getFullYear(), currentDate.getMonth() + 1, 0);
+        const totalDays = lastDay.getDate();
+        
+        // Add empty cells for days before first day of month
+        for (let i = 0; i < firstDay.getDay(); i++) {
+            const emptyDay = document.createElement('div');
+            emptyDay.className = 'day inactive';
+            calendarGrid.appendChild(emptyDay);
+        }
+        
+        // Add days
+        for (let day = 1; day <= totalDays; day++) {
+            const dayEl = document.createElement('div');
+            
+            // Assign colors based on distribution: 60% blue, 30% yellow, 10% red
+            let dayColor;
+            const dayPercent = Math.ceil((day / totalDays) * 100);
+            
+            if (dayPercent <= 60) {
+                dayColor = 'blue';
+            } else if (dayPercent <= 90) {
+                dayColor = 'yellow';
+            } else {
+                dayColor = 'red';
+            }
+            
+            dayEl.className = `day ${dayColor}`;
+            
+            const dayNumber = document.createElement('div');
+            dayNumber.className = 'day-number';
+            dayNumber.textContent = day;
+            dayEl.appendChild(dayNumber);
+            
+            // Add study times
+            const studyTime = document.createElement('div');
+            studyTime.className = 'study-time';
+            
+            // Different study times based on color
+            if (dayColor === 'blue') {
+                studyTime.textContent = 'Studio: 8:00 - 12:00';
+            } else if (dayColor === 'yellow') {
+                studyTime.textContent = 'Gym: 15:00 - 17:00';
+            } else {
+                studyTime.textContent = 'Test: 10:00 - 11:30';
+            }
+            
+            dayEl.appendChild(studyTime);
+            
+            // Highlight May 20th with our objective (esame)
+            if (currentDate.getMonth() === 4 && day === 19) {
+                const highlight = document.createElement('div');
+                highlight.className = 'highlight';
+                dayEl.appendChild(highlight);
+            }
+            
+            calendarGrid.appendChild(dayEl);
+        }
+        
+        // Setup day click handlers after calendar is updated
+        setupDayClickHandlers();
+    }
+    
+    // Setup click handlers for days
+    function setupDayClickHandlers() {
+    const calendarDays = document.querySelectorAll('.day');
+
+    calendarDays.forEach(day => {
+        day.addEventListener('click', function() {
+            const dayNumber = this.querySelector('.day-number');
+            const popup = document.getElementById('dayPopup');
+            const popupHeader = document.querySelector('.popup-header h2');
+            const studySchedule = document.querySelector('.study-schedule');
+            const todoSection = document.querySelector('.todo-section');
+            const popupContent = document.querySelector('.popup-content');
+            const examOptionsContainer = document.createElement('div'); // Crea un contenitore per i bottoni
+
+            examOptionsContainer.className = 'exam-options';
+            examOptionsContainer.style.display = 'flex';
+            examOptionsContainer.style.flexDirection = 'column';
+            examOptionsContainer.style.gap = '15px';
+
+            // If it's the 12th of the month and the current month is May (month 4)
+            if (dayNumber && dayNumber.textContent === '12' && currentDate.getMonth() === 4) {
+                popupHeader.textContent = '12 Maggio 2025';
+                studySchedule.style.display = 'block';
+                todoSection.style.display = 'block';
+                // Rimuovi eventuali bottoni esame precedenti
+                const existingExamOptions = popupContent.querySelector('.exam-options');
+                if (existingExamOptions) {
+                    popupContent.removeChild(existingExamOptions);
+                }
+                popup.classList.add('active');
+            }
+
+            // If it's the 20th of the month and the current month is May (month 4)
+            if (dayNumber && dayNumber.textContent === '19' && currentDate.getMonth() === 4) {
+                popupHeader.textContent = '19 Maggio 2025';
+                studySchedule.style.display = 'none';
+                todoSection.style.display = 'none';
+
+                // Crea i bottoni "Orale" e "Scritto"
+                examOptionsContainer.innerHTML = `
+                    <h3>Seleziona il tipo di esame:</h3>
+                    <div style="display: flex; gap: 10px; justify-content: center;">
+                        <button class="exam-btn" style="background-color: #3498db; color: white; border: none; padding: 12px 25px; border-radius: 5px; font-weight: bold; cursor: pointer; flex: 1; max-width: 150px;">Orale</button>
+                        <button class="exam-btn" style="background-color: #3498db; color: white; border: none; padding: 12px 25px; border-radius: 5px; font-weight: bold; cursor: pointer; flex: 1; max-width: 150px;">Scritto</button>
+                    </div>
+                `;
+
+                // Aggiungi i bottoni al contenuto del popup
+                popupContent.appendChild(examOptionsContainer);
+                popup.classList.add('active');
+            } else if (dayNumber && dayNumber.textContent !== '12' && dayNumber.textContent !== '20') {
+                popup.classList.remove('active');
+            }
+        });
+    });
+}
+    
+    // To-Do List functionality
+    function setupTodoList() {
+        const todoList = document.getElementById('todoList');
+        const newTodoInput = document.getElementById('newTodoInput');
+        const addTodoBtn = document.getElementById('addTodoBtn');
+        
+        // Load saved to-dos from localStorage (if present)
+        const savedTodos = localStorage.getItem('todos12May');
+        if (savedTodos) {
+            todoList.innerHTML = savedTodos;
+            // Reactivate event listeners
+            addTodoEventListeners();
+        }
+        
+        // Add new to-do
+        addTodoBtn.addEventListener('click', addNewTodo);
+        newTodoInput.addEventListener('keypress', function(e) {
+            if (e.key === 'Enter') {
+                addNewTodo();
+            }
+        });
+        
+        function addNewTodo() {
+            const todoText = newTodoInput.value.trim();
+            if (todoText) {
+                // Create new to-do element
+                const todoItem = document.createElement('li');
+                todoItem.className = 'todo-item';
+                todoItem.innerHTML = `
+                    <div class="todo-checkbox"></div>
+                    <span class="todo-text">${todoText}</span>
+                    <div class="todo-delete">×</div>
+                `;
+                
+                // Add to the list
+                todoList.appendChild(todoItem);
+                
+                // Reset input
+                newTodoInput.value = '';
+                newTodoInput.focus();
+                
+                // Add event listeners to the new to-do
+                addTodoItemListeners(todoItem);
+                
+                // Save to localStorage
+                saveTodos();
+            }
+        }
+        
+        function addTodoEventListeners() {
+            // Add event listeners to all existing to-do items
+            document.querySelectorAll('.todo-item').forEach(item => {
+                addTodoItemListeners(item);
+            });
+        }
+        
+        function addTodoItemListeners(todoItem) {
+            // Toggle checkbox
+            const checkbox = todoItem.querySelector('.todo-checkbox');
+            checkbox.addEventListener('click', function() {
+                this.classList.toggle('checked');
+                todoItem.classList.toggle('checked');
+                saveTodos();
+            });
+            
+            // Delete to-do
+            const deleteBtn = todoItem.querySelector('.todo-delete');
+            deleteBtn.addEventListener('click', function() {
+                todoItem.remove();
+                saveTodos();
+            });
+        }
+        
+        function saveTodos() {
+            localStorage.setItem('todos12May', todoList.innerHTML);
+        }
+    }
+    
+    // Close popup button
+    document.getElementById('closePopup').addEventListener('click', function() {
+        document.getElementById('dayPopup').classList.remove('active');
+    });
+    
+    // Close popup when clicking outside
+    document.getElementById('dayPopup').addEventListener('click', function(e) {
+        if (e.target === this) {
+            this.classList.remove('active');
+        }
+    });
+    
+    // Toggle empty state (for demo purposes)
+    document.querySelector('.add-button').addEventListener('click', function() {
+        const calendarGrid = document.getElementById('calendarGrid');
+        const emptyState = document.getElementById('emptyState');
+        
+        if (calendarGrid.style.display !== 'none') {
+            calendarGrid.style.display = 'none';
+            emptyState.style.display = 'flex';
+        } else {
+            calendarGrid.style.display = 'grid';
+            emptyState.style.display = 'none';
+        }
+    });
+    
+    // Initialize calendar
+    updateCalendar();
+    
+    // Update progress bar to 50%
+    updateProgressBar();
+    
+    // Add month navigation
+    document.getElementById('prevMonth').addEventListener('click', function() {
+        currentDate.setMonth(currentDate.getMonth() - 1);
+        updateCalendar();
+    });
+    
+    document.getElementById('nextMonth').addEventListener('click', function() {
+        currentDate.setMonth(currentDate.getMonth() + 1);
+        updateCalendar();
+    });
+    
+    // Initialize todo list
+    setupTodoList();
+});
+    </script>
+</body>
+</html>

@@ -11,13 +11,6 @@ import sounddevice as sd
 from google.genai import Client
 import google.genai as genai
 from scipy.io.wavfile import write
-from google.adk.agents import LlmAgent
-from google.adk.agents.callback_context import CallbackContext
-from google.adk.models import LlmResponse, LlmRequest
-from google.adk.runners import Runner
-from typing import Optional
-from google.genai import types 
-from google.adk.sessions import InMemorySessionService
 
 # Load embedding model
 model = SentenceTransformer('all-MiniLM-L6-v2')
@@ -25,7 +18,11 @@ model = SentenceTransformer('all-MiniLM-L6-v2')
 # Setup Qdrant
 clientQ = QdrantClient(":memory:")
 client = texttospeech.TextToSpeechClient()
-clientG = genai.Client(api_key="AIzaSyA2liZpTTjGNF29AQ4Z1wv7kBO48oYj-m4")
+clientG = genai.Client(api_key="AIzaSyAc1bkPAQ9pE-EL1llkaqAoqNDjv1uscVI")
+
+print("MODELLI AAAA")
+response=clientG.models.list(config={'page_size': 5})
+print(response.page)
 
 # Create collection
 print("Creating collection...")
@@ -94,66 +91,63 @@ async def tts_google(data : str):
     
     await play_mp3_async("output.mp3")
 
-# def record_audio(filename="audio.wav", duration=10, fs=44100):
-#     print("Registrazione in corso...")
-#     audio = sd.rec(int(duration * fs), samplerate=fs, channels=1, dtype='int16')
-#     sd.wait()
-#     write(filename, fs, audio)
-#     print(f"Audio salvato in: {filename}")
-#     #stt_tool(filename)
-#     return None
+    try:
+        os.remove("output.mp3")
+        print(f"File {"output.mp3"} eliminato.")
+    except Exception as e:
+        print(f"Errore durante l'eliminazione del file {"output.mp3"}: {e}")
+    
 
-def record_audio(
-    callback_context: CallbackContext, llm_request: LlmRequest
-) -> Optional[LlmResponse]:
-    """Inspects/modifies the LLM request or skips the call."""
-    agent_name = callback_context.agent_name
-    print(f"[Callback] Before model call for agent: {agent_name}")
+def record_audio():
+    duration=10 
+    fs=44100
+    filename="audio.wav"
+    print("Registrazione in corso...")
+    audio = sd.rec(int(duration * fs), samplerate=fs, channels=1, dtype='int16')
+    sd.wait()
+    write(filename, fs, audio)
+    print(f"Audio salvato in: {filename}")
+    stt_tool(filename)
+    return filename
 
-    # Inspect the last user message in the request contents
-    last_user_message = ""
-    if llm_request.contents and llm_request.contents[-1].role == 'user':
-         if llm_request.contents[-1].parts:
-            last_user_message = llm_request.contents[-1].parts[0].text
-    print(f"[Callback] Inspecting last user message: '{last_user_message}'")
+def stt_tool(filepath, output_txt="trascrizione.txt"):
+    print("Caricamento file e trascrizione...")
+    try:
+        audio_file = genai.upload_file(path=filepath)
+        myfile = clientG.files.upload(file=filepath)
 
+        response = clientG.models.generate_content(
+            model="gemini-1.5-pro-001",
+            contents=["Describe this audio clip", myfile]
+        )
 
-# def stt_tool(filepath, output_txt="trascrizione.txt"):
-#     print("Caricamento file e trascrizione...")
-#     try:
-#         audio_file = genai.upload_file(path=filepath)
-#         myfile = clientG.files.upload(file=filepath)
+        trascrizione = response.text
 
-#         response = clientG.models.generate_content(
-#             model="gemini-1.5-pro-001",
-#             contents=["Describe this audio clip", myfile]
-#         )
+        # Salva nel file .txt
+        with open(output_txt, "w", encoding="utf-8") as f:
+            f.write(trascrizione)
 
-#         trascrizione = response.text
+        # Rimuovi il file da GenAI
+        genai.delete_file(audio_file.name)
 
-#         # Salva nel file .txt
-#         with open(output_txt, "w", encoding="utf-8") as f:
-#             f.write(trascrizione)
+        print("Testo trascritto:")
+        print(trascrizione)
+        print(f"Trascrizione salvata in: {output_txt}")
 
-#         # Rimuovi il file da GenAI
-#         genai.delete_file(audio_file.name)
-
-#         print("Testo trascritto:")
-#         print(trascrizione)
-#         print(f"Trascrizione salvata in: {output_txt}")
-
-#         return trascrizione
-#     except Exception as e:
-#         print("Errore durante la trascrizione:", e)
-
+        return trascrizione
+    except Exception as e:
+        print("Errore durante la trascrizione:", e)
 
 question_agent = Agent(
-    model='gemini-2.0-flash-001',
+    model='gemini-1.5-pro-001', # Assicurati che questo modello sia compatibile con il tuo ambiente
     name="questioner",
     description="This agent asks a question to the user about the French Revolution.",
-    instruction="You are interested in just one thing. Ask the user one clear and specific question about the French Revolution. Wait the answer of the user and give back controll to the pipeline_agent.",
-    output_key="question",
-    before_agent_callback=record_audio
+    # Modifica l'istruzione: Rimuovi la parte sull'attesa della risposta e il controllo
+    instruction="You are interested in just one thing. Ask the user one clear and specific question about the French Revolution.",
+    output_key="question"
+    # Rimuovi completamente i commenti e le linee relative a tools o before_agent_callback per record_audio
+    # tools=[] # O lascia vuoto se non usi altri tool qui
+    # before_agent_callback=None # Assicurati che non ci sia
 )
 
 
