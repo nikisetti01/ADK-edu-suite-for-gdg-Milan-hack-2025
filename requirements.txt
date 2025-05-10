@@ -24,6 +24,11 @@ pydantic
 aiohttp
 nest_asyncio
 
+# pdf handling
+PyPDF2
+google-generativeai
+fpdf
+
 # Optional: Groq integration
 groq
 
