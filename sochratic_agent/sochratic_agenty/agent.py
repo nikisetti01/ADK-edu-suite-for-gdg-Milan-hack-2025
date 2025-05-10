@@ -1,4 +1,4 @@
-from google.adk.agents import Agent
+from google.adk.agents import Agent, SequentialAgent, BaseAgent
 from google.adk.tools.function_tool import FunctionTool
 from qdrant_client import QdrantClient
 from qdrant_client.models import VectorParams, Distance, PointStruct
@@ -19,7 +19,7 @@ client.recreate_collection(
 )
 
 # Load documents
-folder = os.path.join(os.path.dirname(_file_), "data")
+folder = os.path.join(os.path.dirname(__file__), "data")
 points = []
 for idx, filename in enumerate(os.listdir(folder)):
     with open(os.path.join(folder, filename), "r") as f:
@@ -41,51 +41,59 @@ def qdrant_retrieve(query: str) -> str:
     )
     return "\n\n".join([hit.payload["text"] for hit in results])
 
-question_agent=Agent(
+question_agent = Agent(
     model='gemini-2.0-flash-001',
     name="questioner",
-    instruction="you are a questioner, ask a question to the user and wait for the answer about revolution French.",
-    output_key="question"
+    description="This agent asks a question to the user about the French Revolution.",
+    instruction="You are interested in just one thing. Ask the user one clear and specific question about the French Revolution. Wait the answer of the user and give back controll to the pipeline_agent.",
+    output_key="question",
 )
 
 
-imprecision_detector=Agent(
+
+imprecision_detector = Agent(
     model='gemini-2.0-flash-001',
     name="imprecision_detector",
-    description="you are an imprecision_detector, just find and return the imprecision in the user answer.",
-    instruction= """Using the answer of the user and the {question} receive by the
-    agent and the retrieve tool find the phrases used by the user answer that are incorrect for the answer or not totaly correct and answer with them, DO NOT correct just report the error phrases to the sochratic agent without answer .""",
+    description="This agent identifies inaccuracies or imprecise statements in the user's answer.",
+    instruction="""You are an imprecision detector. 
+Wait for the answer of the user. You receive the user's answer and the original question: {question}.
+Use the retrieval tool to verify facts. 
+Return to the user his sentence highlighting with bold characters the wrong parts of his answer. 
+Do **not** correct or explain the errors. Set the list of errors in your state and turn yourself off.""",
     output_key="errors",
     tools=[qdrant_retrieve]
 )
 
 
-sochratic_agent=Agent(
+
+sochratic_agent = Agent(
     model='gemini-2.0-flash-001',
-    name="sochratique",
-    description="you are a sochratique agent, you need to make a question about the error the user made in the answer .",
-    instruction="you have to ask the user a question based on the error made, just one simple question that go deep in that topic"
-    "use the tool retrieve to understand and create a better question about that topic. For answer report the {errors} received from the imprecision_detector agent and the new question you have to ask the user.",
-    output_key="question",
+    name="sochratic_agent",
+    description="This agent formulates a follow-up question based on a mistake the user made.",
+    instruction="""You are a Socratic agent. 
+User the highleighted errors received from the imprecision_detector agent to understand the user's mistakes in {errors}.
+Use the retrieval tool if needed to better understand the topic.
+Then, generate **one thought-provoking question** that focuses specifically on one of the incorrect phrases, encouraging the user to reflect or elaborate on that point.
+Your answer must include:
+- The list of error phrases received.
+- A single new Socratic question to ask the user about one of those errors.""",
+    output_key="socratic_question",
     tools=[qdrant_retrieve]
 )
 
-
-pipeline_agent= Agent(
-    model='gemini-2.0-flash-001',
-    name="pipeline",
-    description="you are a pipeline agent, you have to link the imprecision_detector and the sochratic_agent.",
-    instruction="you are the pipeline agent, you have to use the imprecision_detector and pass its answer to the sochratic_agent.",
-    output_key="question",
-    tools=[qdrant_retrieve]
+pipeline_agent = SequentialAgent(
+    name="pipeline_agent",
+    description="Executes a sequence of detection and sochratic question.",
+    sub_agents=[imprecision_detector, sochratic_agent],
 )
 
+root_agent = Agent(
+    name="agent",
+    model='gemini-2.0-flash',
+    description="Coordinates all sub-agents.",
+    instruction="""You are the coordinator agent. 
+When the user greets you (e.g., says 'hi'), start the process by giving him the question using the question agent. Than do NOT  EVER use the question again but use pipeline_agent.
+When the user responds handle the response by forwarding it to the  pipeline_agent.""",
 
-root_agent=Agent(
-    model='gemini-2.0-flash-001',
-    name="coordinator",
-    description="you are the coordinator you have to coordinate the subagent.",
-    instruction="""you are the coordinator when the user say hi you have to call the sub-agent question_agent produce the question than when the user answer you pass the answer of the user
-    to the subagent  pipeline_agent.""",
-    sub_agents=[question_agent, imprecision_detector, sochratic_agent],
+    sub_agents=[question_agent,pipeline_agent],
 )
