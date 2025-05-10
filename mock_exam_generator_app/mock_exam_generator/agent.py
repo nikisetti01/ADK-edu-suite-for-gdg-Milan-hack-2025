@@ -4,10 +4,11 @@ from fpdf import FPDF
 import google.generativeai as genai
 import os
 from datetime import datetime
+    
+pdf_path = "./mock_exam_generator/mocks/rivoluzione_francese.pdf"
+
 
 def generate_mockup():
-
-    pdf_path = "./mock_exam_generator/mocks/es1AM-Classe_I_25-01-15.pdf"
 
     # 1. Extract text from the PDF
     text = ""
@@ -47,9 +48,9 @@ root_agent = Agent(
     model='gemini-2.0-flash-live-001',
     name='root_agent',
     description='Generates mock exam questions or exercises based on past exams',
-    instruction='''Generate a mock exam based on the provided image files using the generate_mockup tool. 
+    instruction=f'''Generate a mock exam based on the provided image files using the generate_mockup tool. 
                 The exam should be similar in style and content to the text of the original document, but with different questions and exercises.
-                You don't need the file to be uploaded by the user nor to ask the file path, you already know that the path is "./mock_exam_generator/mocks/es1AM-Classe_I_25-01-15.pdf".
+                You don't need the file to be uploaded by the user nor to ask the file path, you already know that the path is {pdf_path}.
                 The output should be a new PDF file containing the generated exam questions and exercises.
                 ''',
     tools=[generate_mockup]
