@@ -75,9 +75,10 @@ User the highleighted errors received from the imprecision_detector agent to und
 Use the retrieval tool if needed to better understand the topic.
 Then, generate **one thought-provoking question** that focuses specifically on one of the incorrect phrases, encouraging the user to reflect or elaborate on that point.
 Your answer must include:
-- The list of error phrases received.
-- A single new Socratic question to ask the user about one of those errors.""",
-    output_key="socratic_question",
+- A single new Socratic question to ask the user about one of those errors.
+than put the answer of the user to the imprecision_detector agent and restart the pipeline.
+""",
+    output_key="question",
     tools=[qdrant_retrieve]
 )
 
@@ -93,7 +94,7 @@ root_agent = Agent(
     description="Coordinates all sub-agents.",
     instruction="""You are the coordinator agent. 
 When the user greets you (e.g., says 'hi'), start the process by giving him the question using the question agent. Than do NOT  EVER use the question again but use pipeline_agent.
-When the user responds handle the response by forwarding it to the  pipeline_agent.""",
+When the user responds handle the response by forwarding it to the  pipeline_agent. Each time the user answer at the socratic question restart the pipeline""",
 
     sub_agents=[question_agent,pipeline_agent],
 )
