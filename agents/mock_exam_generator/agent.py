@@ -35,7 +35,7 @@ def generate_mockup():
     pdf.multi_cell(0, 10, safe_text)
 
     # 5. Save to the target folder
-    output_folder = "./mock_exam_generator/mocks"
+    output_folder = "./mock_exam_generator/mocks/generated_mocks"
 
     # Generate a filename like: "mock_20240510_142356.pdf"
     timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
