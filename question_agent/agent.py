@@ -40,7 +40,7 @@ client.upsert(collection_name="my_docs", points=points)
 
 
 def tts_google(data : str):
-    synthesis_input = texttospeech.SynthesisInput(text="Hello, World!")
+    synthesis_input = texttospeech.SynthesisInput(text=data)
 
     # Build the voice request, select the language code ("en-US") and the ssml
     # voice gender ("neutral")
