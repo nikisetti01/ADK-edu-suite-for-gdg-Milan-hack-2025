@@ -17,7 +17,7 @@ from google.adk.sessions.in_memory_session_service import InMemorySessionService
 
 from fastapi import FastAPI, WebSocket
 from fastapi.staticfiles import StaticFiles
-from fastapi.responses import FileResponse
+from fastapi.responses import FileResponse, JSONResponse
 
 from mock_exam_generator.agent import root_agent
 
@@ -114,11 +114,42 @@ app = FastAPI()
 STATIC_DIR = Path("static")
 app.mount("/static", StaticFiles(directory=STATIC_DIR), name="static")
 
+# Directory for generated PDF files
+MOCK_EXAMS_DIR = Path("mock_exam_generator/mocks/generated_mocks")
+
+# Serve the PDFs directory
+app.mount(
+    "/pdfs", 
+    StaticFiles(directory=MOCK_EXAMS_DIR, html=False), 
+    name="pdfs"
+)
+
 
 @app.get("/")
 async def root():
     """Serves the index.html"""
     return FileResponse(os.path.join(STATIC_DIR, "index.html"))
+
+
+@app.get("/list-pdfs")
+async def list_pdfs():
+    """Lists all PDF files in the generated_mocks directory"""
+    pdf_files = []
+    
+    if MOCK_EXAMS_DIR.exists():
+        for file in MOCK_EXAMS_DIR.glob("*.pdf"):
+            # Get creation time for sorting (newest first)
+            creation_time = file.stat().st_mtime
+            pdf_files.append({
+                "filename": file.name,
+                "url": f"/pdfs/{file.name}",
+                "created": creation_time
+            })
+    
+    # Sort by creation time (newest first)
+    pdf_files.sort(key=lambda x: x["created"], reverse=True)
+    
+    return JSONResponse(content={"pdfs": pdf_files})
 
 
 @app.websocket("/ws/{session_id}")

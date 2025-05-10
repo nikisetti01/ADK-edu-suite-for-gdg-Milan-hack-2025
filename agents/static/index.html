@@ -3,7 +3,7 @@
   <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Chat with AI Agent</title>
+    <title>Mock Exam Generator</title>
     <link rel="stylesheet" href="/static/styles.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
   </head>
@@ -11,7 +11,7 @@
   <body>
     <div class="container">
       <header>
-        <h1><i class="fas fa-robot"></i> Chat with AI Agent</h1>
+        <h1><i class="fas fa-graduation-cap"></i> Mock Exam Generator</h1>
         <div id="connection-status" class="status disconnected">
           <span class="status-indicator"></span>
           <span class="status-text">Disconnected</span>
@@ -19,27 +19,45 @@
       </header>
 
       <main>
-        <div id="messages" class="messages-container">
-          <div class="welcome-message">
-            <h2>Welcome to AI Agent Chat</h2>
-            <p>Type a message below to start chatting with the AI agent.</p>
+        <div class="app-container">
+          <div class="chat-container">
+            <div id="messages" class="messages-container">
+              <div class="welcome-message">
+                <h2>Welcome to Mock Exam Generator</h2>
+                <p>Chat with the AI to generate customized mock exams. Your generated PDFs will appear in the sidebar.</p>
+              </div>
+            </div>
+
+            <form id="messageForm" class="message-form">
+              <div class="input-container">
+                <input 
+                  type="text" 
+                  id="message" 
+                  name="message" 
+                  placeholder="Ask the AI to generate a mock exam..." 
+                  autocomplete="off"
+                />
+                <button type="submit" id="sendButton" disabled>
+                  <i class="fas fa-paper-plane"></i>
+                </button>
+              </div>
+            </form>
+          </div>
+
+          <div class="pdf-sidebar">
+            <div class="pdf-header">
+              <h3><i class="fas fa-file-pdf"></i> Generated Exams</h3>
+              <button id="refreshPdfs" class="refresh-button">
+                <i class="fas fa-sync-alt"></i>
+              </button>
+            </div>
+            <div id="pdfList" class="pdf-list">
+              <div class="pdf-loading">
+                <p>Loading generated exams...</p>
+              </div>
+            </div>
           </div>
         </div>
-
-        <form id="messageForm" class="message-form">
-          <div class="input-container">
-            <input 
-              type="text" 
-              id="message" 
-              name="message" 
-              placeholder="Type your message here..." 
-              autocomplete="off"
-            />
-            <button type="submit" id="sendButton" disabled>
-              <i class="fas fa-paper-plane"></i>
-            </button>
-          </div>
-        </form>
       </main>
 
       <footer>
@@ -59,8 +77,11 @@
       const messagesDiv = document.getElementById("messages");
       const connectionStatus = document.getElementById("connection-status");
       const statusText = connectionStatus.querySelector(".status-text");
+      const pdfList = document.getElementById("pdfList");
+      const refreshPdfsButton = document.getElementById("refreshPdfs");
       let currentMessageId = null;
       let isAgentTyping = false;
+      let pdfCheckInterval = null;
 
       // Function to update connection status
       function updateConnectionStatus(isConnected) {
@@ -70,6 +91,55 @@
         } else {
           connectionStatus.className = "status disconnected";
           statusText.textContent = "Disconnected";
+        }
+      }
+
+      // Function to format date
+      function formatDate(timestamp) {
+        const date = new Date(timestamp * 1000);
+        return date.toLocaleString();
+      }
+
+      // Function to fetch and display PDF files
+      async function fetchPDFs() {
+        try {
+          const response = await fetch('/list-pdfs');
+          const data = await response.json();
+          
+          if (data.pdfs && data.pdfs.length > 0) {
+            pdfList.innerHTML = '';
+            
+            data.pdfs.forEach(pdf => {
+              const pdfItem = document.createElement('div');
+              pdfItem.className = 'pdf-item';
+              
+              const createdDate = new Date(pdf.created * 1000);
+              const formattedDate = createdDate.toLocaleString();
+              
+              pdfItem.innerHTML = `
+                <div class="pdf-icon"><i class="fas fa-file-pdf"></i></div>
+                <div class="pdf-info">
+                  <div class="pdf-name">${pdf.filename}</div>
+                  <div class="pdf-date">${formattedDate}</div>
+                </div>
+                <div class="pdf-actions">
+                  <a href="${pdf.url}" target="_blank" class="pdf-view-btn" title="View PDF">
+                    <i class="fas fa-eye"></i>
+                  </a>
+                  <a href="${pdf.url}" download class="pdf-download-btn" title="Download PDF">
+                    <i class="fas fa-download"></i>
+                  </a>
+                </div>
+              `;
+              
+              pdfList.appendChild(pdfItem);
+            });
+          } else {
+            pdfList.innerHTML = '<div class="pdf-empty"><p>No mock exams generated yet.</p><p>Chat with the AI to create one!</p></div>';
+          }
+        } catch (error) {
+          console.error('Error fetching PDFs:', error);
+          pdfList.innerHTML = '<div class="pdf-error"><p>Error loading PDFs. Please try again.</p></div>';
         }
       }
 
@@ -133,6 +203,15 @@
             hideTypingIndicator();
             currentMessageId = "agent-" + Date.now();
             messageDiv.id = currentMessageId;
+            
+            // Check if text contains PDF file notification
+            const pdfRegex = /generated|created|produced|completed|finished|ready|available|exam|mock|pdf/i;
+            if (pdfRegex.test(text)) {
+              // Schedule PDF refresh if text indicates a PDF might be created
+              setTimeout(fetchPDFs, 1000);
+              setTimeout(fetchPDFs, 3000); // Try again after 3 seconds in case it takes time to write the file
+            }
+            
             contentDiv.textContent = text;
             messageDiv.appendChild(avatarDiv);
             messageDiv.appendChild(contentDiv);
@@ -173,6 +252,12 @@
             }, 500);
           }
           
+          // Initial PDF fetch
+          fetchPDFs();
+          
+          // Set interval to check for new PDFs every 5 seconds
+          pdfCheckInterval = setInterval(fetchPDFs, 5000);
+          
           addSubmitHandler(this);
         };
 
@@ -184,6 +269,9 @@
           // Check if the turn is complete
           if (packet.turn_complete && packet.turn_complete == true) {
             currentMessageId = null;
+            
+            // Check for PDFs after turn is complete (in case one was generated)
+            setTimeout(fetchPDFs, 1000);
             return;
           }
 
@@ -198,6 +286,11 @@
           console.log("WebSocket connection closed.");
           document.getElementById("sendButton").disabled = true;
           updateConnectionStatus(false);
+          
+          // Clear PDF check interval
+          if (pdfCheckInterval) {
+            clearInterval(pdfCheckInterval);
+          }
           
           setTimeout(function () {
             console.log("Reconnecting...");
@@ -227,6 +320,16 @@
           return false;
         };
       }
+
+      // Add refresh button handler
+      refreshPdfsButton.addEventListener("click", function() {
+        this.classList.add("refreshing");
+        fetchPDFs().then(() => {
+          setTimeout(() => {
+            this.classList.remove("refreshing");
+          }, 500);
+        });
+      });
 
       // Enable sending messages with Enter key
       messageInput.addEventListener("keydown", function(e) {
