@@ -1,0 +1,240 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Chat with AI Agent</title>
+    <link rel="stylesheet" href="/static/styles.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  </head>
+
+  <body>
+    <div class="container">
+      <header>
+        <h1><i class="fas fa-robot"></i> Chat with AI Agent</h1>
+        <div id="connection-status" class="status disconnected">
+          <span class="status-indicator"></span>
+          <span class="status-text">Disconnected</span>
+        </div>
+      </header>
+
+      <main>
+        <div id="messages" class="messages-container">
+          <div class="welcome-message">
+            <h2>Welcome to AI Agent Chat</h2>
+            <p>Type a message below to start chatting with the AI agent.</p>
+          </div>
+        </div>
+
+        <form id="messageForm" class="message-form">
+          <div class="input-container">
+            <input 
+              type="text" 
+              id="message" 
+              name="message" 
+              placeholder="Type your message here..." 
+              autocomplete="off"
+            />
+            <button type="submit" id="sendButton" disabled>
+              <i class="fas fa-paper-plane"></i>
+            </button>
+          </div>
+        </form>
+      </main>
+
+      <footer>
+        <p>Powered by Google ADK Streaming</p>
+      </footer>
+    </div>
+
+    <script>
+      // Connect the server with a WebSocket connection
+      const sessionId = Math.random().toString().substring(10);
+      const ws_url = "ws://" + window.location.host + "/ws/" + sessionId;
+      let ws = new WebSocket(ws_url);
+
+      // Get DOM elements
+      const messageForm = document.getElementById("messageForm");
+      const messageInput = document.getElementById("message");
+      const messagesDiv = document.getElementById("messages");
+      const connectionStatus = document.getElementById("connection-status");
+      const statusText = connectionStatus.querySelector(".status-text");
+      let currentMessageId = null;
+      let isAgentTyping = false;
+
+      // Function to update connection status
+      function updateConnectionStatus(isConnected) {
+        if (isConnected) {
+          connectionStatus.className = "status connected";
+          statusText.textContent = "Connected";
+        } else {
+          connectionStatus.className = "status disconnected";
+          statusText.textContent = "Disconnected";
+        }
+      }
+
+      // Function to show typing indicator
+      function showTypingIndicator() {
+        if (isAgentTyping) return;
+        
+        isAgentTyping = true;
+        const typingDiv = document.createElement("div");
+        typingDiv.id = "typing-indicator";
+        typingDiv.className = "message agent typing-indicator";
+        typingDiv.innerHTML = `
+          <div class="message-avatar">
+            <i class="fas fa-robot"></i>
+          </div>
+          <div class="message-content">
+            <div class="typing-dots">
+              <span></span>
+              <span></span>
+              <span></span>
+            </div>
+          </div>
+        `;
+        messagesDiv.appendChild(typingDiv);
+        messagesDiv.scrollTop = messagesDiv.scrollHeight;
+      }
+
+      // Function to hide typing indicator
+      function hideTypingIndicator() {
+        if (!isAgentTyping) return;
+        
+        isAgentTyping = false;
+        const typingIndicator = document.getElementById("typing-indicator");
+        if (typingIndicator) {
+          typingIndicator.remove();
+        }
+      }
+
+      // Function to add a message to the chat
+      function addMessage(text, isUser = false) {
+        const messageDiv = document.createElement("div");
+        messageDiv.className = isUser ? "message user" : "message agent";
+        
+        // Create avatar
+        const avatarDiv = document.createElement("div");
+        avatarDiv.className = "message-avatar";
+        avatarDiv.innerHTML = isUser ? 
+          '<i class="fas fa-user"></i>' : 
+          '<i class="fas fa-robot"></i>';
+        
+        // Create message content
+        const contentDiv = document.createElement("div");
+        contentDiv.className = "message-content";
+        
+        if (isUser) {
+          contentDiv.textContent = text;
+          messageDiv.appendChild(avatarDiv);
+          messageDiv.appendChild(contentDiv);
+        } else {
+          if (!currentMessageId) {
+            hideTypingIndicator();
+            currentMessageId = "agent-" + Date.now();
+            messageDiv.id = currentMessageId;
+            contentDiv.textContent = text;
+            messageDiv.appendChild(avatarDiv);
+            messageDiv.appendChild(contentDiv);
+            messagesDiv.appendChild(messageDiv);
+          } else {
+            const existingMessage = document.getElementById(currentMessageId);
+            if (existingMessage) {
+              const existingContent = existingMessage.querySelector(".message-content");
+              existingContent.textContent += text;
+            }
+          }
+        }
+        
+        if (isUser) {
+          messagesDiv.appendChild(messageDiv);
+          showTypingIndicator();
+        }
+        
+        // Scroll to bottom
+        messagesDiv.scrollTop = messagesDiv.scrollHeight;
+      }
+
+      // WebSocket handlers
+      function addWebSocketHandlers(ws) {
+        ws.onopen = function () {
+          console.log("WebSocket connection opened.");
+          document.getElementById("sendButton").disabled = false;
+          updateConnectionStatus(true);
+          
+          // Remove welcome message when connection is established
+          const welcomeMessage = document.querySelector(".welcome-message");
+          if (welcomeMessage) {
+            welcomeMessage.classList.add("fade-out");
+            setTimeout(() => {
+              if (welcomeMessage && welcomeMessage.parentNode) {
+                welcomeMessage.parentNode.removeChild(welcomeMessage);
+              }
+            }, 500);
+          }
+          
+          addSubmitHandler(this);
+        };
+
+        ws.onmessage = function (event) {
+          // Parse the incoming message
+          const packet = JSON.parse(event.data);
+          console.log(packet);
+
+          // Check if the turn is complete
+          if (packet.turn_complete && packet.turn_complete == true) {
+            currentMessageId = null;
+            return;
+          }
+
+          // Handle message content
+          if (packet.message) {
+            addMessage(packet.message, false);
+          }
+        };
+
+        // When the connection is closed, try reconnecting
+        ws.onclose = function () {
+          console.log("WebSocket connection closed.");
+          document.getElementById("sendButton").disabled = true;
+          updateConnectionStatus(false);
+          
+          setTimeout(function () {
+            console.log("Reconnecting...");
+            ws = new WebSocket(ws_url);
+            addWebSocketHandlers(ws);
+          }, 5000);
+        };
+
+        ws.onerror = function (e) {
+          console.log("WebSocket error: ", e);
+          updateConnectionStatus(false);
+        };
+      }
+      
+      addWebSocketHandlers(ws);
+
+      // Add submit handler to the form
+      function addSubmitHandler(ws) {
+        messageForm.onsubmit = function (e) {
+          e.preventDefault();
+          const message = messageInput.value.trim();
+          if (message) {
+            addMessage(message, true);
+            ws.send(message);
+            messageInput.value = "";
+          }
+          return false;
+        };
+      }
+
+      // Enable sending messages with Enter key
+      messageInput.addEventListener("keydown", function(e) {
+        if (e.key === "Enter" && !e.shiftKey) {
+          e.preventDefault();
+          document.getElementById("sendButton").click();
+        }
+      });
+    </script>
+  </body>
+</html>

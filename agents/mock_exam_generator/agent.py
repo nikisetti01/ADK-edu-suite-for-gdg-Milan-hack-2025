@@ -44,7 +44,7 @@ def generate_mockup():
 
 
 root_agent = Agent(
-    model='gemini-2.0-flash-001',
+    model='gemini-2.0-flash-live-001',
     name='root_agent',
     description='Generates mock exam questions or exercises based on past exams',
     instruction='''Generate a mock exam based on the provided image files using the generate_mockup tool. 
