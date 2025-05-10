@@ -5,6 +5,9 @@ import json
 import re
 import os
 
+
+#TODO IMPLEMENTARE LA APPLICAZIONE SU UN CALENDAR
+
 def create_calendar(exam_date: str, understanding_level: str, daily_hours: int,
                     study_period: str, exam_title: str) -> str:
     """
