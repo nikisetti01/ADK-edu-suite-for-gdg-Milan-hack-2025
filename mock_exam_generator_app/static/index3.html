@@ -252,6 +252,27 @@
             font-size: 16px;
             font-weight: 500;
         }
+        
+        .add-goal-card {
+            border: 2px dashed #bbb;
+            background-color: #f9f9f9;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            color: #888;
+            text-decoration: none;
+            color: inherit;
+            height: 160px;
+            border-radius: 10px;
+            transition: transform 0.2s ease, box-shadow 0.2s ease;
+            cursor: pointer;
+        }
+        
+        .add-goal-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 5px 15px rgba(0,0,0,0.15);
+        }
     </style>
 </head>
 <body>
@@ -367,7 +388,7 @@
                 </div>
                 
                 <div class="goal-card purple">
-                    <a href="index1.html" style="text-decoration: none; color: inherit; margin-top: 20px;">
+                    <a href="index1.html" style="text-decoration: none; color: inherit;">
                     <h2 class="goal-title">Rivoluzione Francese</h2>
                     
                     <div class="goal-progress">
@@ -379,14 +400,13 @@
                             <span class="goal-deadline">15 Lug 2025</span>
                         </div>
                     </div>
+                    </a>
                 </div>
-            </a>
                 
-                <a style="text-decoration: none; color: inherit;">
+                <a href="form_page.html" class="add-goal-card">
                     <div class="add-goal-icon">+</div>
                     <div class="add-goal-text">Pianifica un nuovo goal</div>
-                  </a>
-                  
+                </a>
             </div>
         </div>
     </div>
