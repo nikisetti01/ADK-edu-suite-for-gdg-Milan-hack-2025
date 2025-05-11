@@ -1,0 +1,394 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Road to Goal - Dashboard</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+        
+        body {
+            background-color: #ffffff;
+            color: #333;
+        }
+        
+        .container {
+            display: flex;
+            height: 100vh;
+        }
+        
+        .sidebar {
+            width: 280px;
+            background-color: #f7f7f7;
+            border-right: 1px solid #e0e0e0;
+            padding-top: 10px;
+            display: flex;
+            flex-direction: column;
+        }
+        
+        .user-profile {
+            padding: 15px 20px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            border-bottom: 1px solid #e0e0e0;
+        }
+        
+        .user-name {
+            font-weight: 600;
+            color: #333;
+        }
+        
+        .dropdown-icon {
+            color: #777;
+            cursor: pointer;
+        }
+        
+        .menu-item {
+            padding: 12px 20px;
+            display: flex;
+            align-items: center;
+            cursor: pointer;
+        }
+        
+        .menu-item:hover {
+            background-color: #f0f0f0;
+        }
+        
+        .menu-item .icon {
+            width: 20px;
+            height: 20px;
+            margin-right: 15px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        
+        .counter {
+            margin-left: auto;
+            background-color: #f1f1f1;
+            border-radius: 12px;
+            padding: 2px 8px;
+            font-size: 12px;
+            color: #555;
+        }
+        
+        .counter.red {
+            background-color: #e74c3c;
+            color: white;
+        }
+        
+        .counter.yellow {
+            background-color: #f1c40f;
+            color: white;
+        }
+        
+        .main-content {
+            flex: 1;
+            padding: 20px;
+            overflow-y: auto;
+        }
+        
+        .top-bar {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 30px;
+        }
+        
+        .add-button {
+            background-color: #f7f7f7;
+            border: none;
+            width: 35px;
+            height: 35px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 24px;
+            color: #555;
+            cursor: pointer;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+        }
+        
+        .search-bar {
+            display: flex;
+            align-items: center;
+            background-color: #f7f7f7;
+            border-radius: 20px;
+            padding: 5px 15px;
+            width: 250px;
+        }
+        
+        .search-icon {
+            color: #777;
+            margin-right: 10px;
+        }
+        
+        .search-input {
+            border: none;
+            background: transparent;
+            flex: 1;
+            outline: none;
+            font-size: 14px;
+        }
+        
+        .dashboard-title {
+            margin-bottom: 30px;
+            font-size: 24px;
+            font-weight: 500;
+        }
+        
+        .goals-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+            gap: 20px;
+        }
+        
+        .goal-card {
+            background-color: #fff;
+            border-radius: 10px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+            padding: 20px;
+            cursor: pointer;
+            transition: transform 0.2s ease, box-shadow 0.2s ease;
+            height: 160px;
+            display: flex;
+            flex-direction: column;
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .goal-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 5px 15px rgba(0,0,0,0.15);
+        }
+        
+        .goal-card.blue {
+            border-left: 5px solid #3498db;
+        }
+        
+        .goal-card.yellow {
+            border-left: 5px solid #f1c40f;
+        }
+        
+        .goal-card.red {
+            border-left: 5px solid #e74c3c;
+        }
+        
+        .goal-card.green {
+            border-left: 5px solid #2ecc71;
+        }
+        
+        .goal-card.purple {
+            border-left: 5px solid #9b59b6;
+        }
+        
+        .goal-card.new {
+            border: 2px dashed #bbb;
+            background-color: #f9f9f9;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            color: #888;
+        }
+        
+        .goal-icon {
+            font-size: 32px;
+            margin-bottom: 15px;
+        }
+        
+        .goal-title {
+            font-weight: 600;
+            font-size: 18px;
+            margin-bottom: 10px;
+        }
+        
+        .goal-progress {
+            margin-top: auto;
+        }
+        
+        .progress-bar {
+            height: 6px;
+            background-color: #f1f1f1;
+            border-radius: 3px;
+            overflow: hidden;
+            margin-bottom: 5px;
+        }
+        
+        .progress-fill {
+            height: 100%;
+        }
+        
+        .goal-stats {
+            display: flex;
+            justify-content: space-between;
+            font-size: 12px;
+            color: #777;
+        }
+        
+        .goal-deadline {
+            color: #e74c3c;
+            font-weight: 500;
+        }
+        
+        .goal-status {
+            color: #3498db;
+        }
+        
+        .add-goal-icon {
+            font-size: 48px;
+            margin-bottom: 10px;
+            color: #aaa;
+        }
+        
+        .add-goal-text {
+            font-size: 16px;
+            font-weight: 500;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="sidebar">
+            <div class="user-profile">
+                <span class="user-name">Alessio Franchini</span>
+                <span class="dropdown-icon">▼</span>
+            </div>
+            
+            <div class="menu-item">
+                <div class="icon">📚</div>
+                <span>Libreria</span>
+                <span class="counter">1</span>
+            </div>
+            
+            <div class="menu-item">
+                <div class="icon">🗂️</div>
+                <span>Mazzi Flashcards</span>
+                <span class="counter">0</span>
+            </div>
+            
+            <div class="menu-item" style="padding-left: 55px;">
+                <div class="icon">📝</div>
+                <span>Flashcards da ripassare</span>
+                <span class="counter red">0</span>
+            </div>
+            
+            <div class="menu-item" style="padding-left: 55px;">
+                <div class="icon">📝</div>
+                <span>Flashcards da iniziare</span>
+                <span class="counter red">0</span>
+            </div>
+            
+            <div class="menu-item" style="padding-left: 55px;">
+                <div class="icon">📝</div>
+                <span>Flashcards in attesa</span>
+                <span class="counter yellow">0</span>
+            </div>
+            
+            <div class="menu-item active">
+                <div class="icon">🎯</div>
+                <span>Road to Goal</span>
+            </div>
+        </div>
+        
+        <div class="main-content">
+            <div class="top-bar">
+                <button class="add-button">+</button>
+                <div class="search-bar">
+                    <span class="search-icon">🔍</span>
+                    <input type="text" class="search-input" placeholder="Cerca nei mazzi...">
+                </div>
+            </div>
+            
+            <h1 class="dashboard-title">I tuoi obiettivi</h1>
+            
+            <div class="goals-grid">
+                <div class="goal-card blue">
+                    <h2 class="goal-title">Esame di Analisi 1</h2>
+                    <div class="goal-progress">
+                        <div class="progress-bar">
+                            <div class="progress-fill blue" style="width: 65%; background-color: #3498db;"></div>
+                        </div>
+                        <div class="goal-stats">
+                            <span class="goal-status">65% completato</span>
+                            <span class="goal-deadline">18 Giu 2025</span>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="goal-card yellow">
+                    <h2 class="goal-title">Impara l'inglese</h2>
+                    <div class="goal-progress">
+                        <div class="progress-bar">
+                            <div class="progress-fill yellow" style="width: 42%; background-color: #f1c40f;"></div>
+                        </div>
+                        <div class="goal-stats">
+                            <span class="goal-status">42% completato</span>
+                            <span class="goal-deadline">30 Ago 2025</span>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="goal-card red">
+                    <h2 class="goal-title">Fisica Generale</h2>
+                    <div class="goal-progress">
+                        <div class="progress-bar">
+                            <div class="progress-fill red" style="width: 25%; background-color: #e74c3c;"></div>
+                        </div>
+                        <div class="goal-stats">
+                            <span class="goal-status">25% completato</span>
+                            <span class="goal-deadline">5 Lug 2025</span>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="goal-card green">
+                    <h2 class="goal-title">Preparazione TOEFL</h2>
+                    <div class="goal-progress">
+                        <div class="progress-bar">
+                            <div class="progress-fill green" style="width: 80%; background-color: #2ecc71;"></div>
+                        </div>
+                        <div class="goal-stats">
+                            <span class="goal-status">80% completato</span>
+                            <span class="goal-deadline">22 Giu 2025</span>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="goal-card purple">
+                    <a href="index1.html" style="text-decoration: none; color: inherit; margin-top: 20px;">
+                    <h2 class="goal-title">Rivoluzione Francese</h2>
+                    
+                    <div class="goal-progress">
+                        <div class="progress-bar">
+                            <div class="progress-fill purple" style="width: 50%; background-color: #9b59b6;"></div>
+                        </div>
+                        <div class="goal-stats">
+                            <span class="goal-status">50% completato</span>
+                            <span class="goal-deadline">15 Lug 2025</span>
+                        </div>
+                    </div>
+                </div>
+            </a>
+                
+                <a style="text-decoration: none; color: inherit;">
+                    <div class="add-goal-icon">+</div>
+                    <div class="add-goal-text">Pianifica un nuovo goal</div>
+                  </a>
+                  
+            </div>
+        </div>
+    </div>
+
+    <script>
+    
+    </script>
+</body>
+</html>

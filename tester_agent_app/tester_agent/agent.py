@@ -34,12 +34,13 @@ def test_the_user():
 
 
 root_agent = Agent(
-    model='gemini-2.0-flash-001',
+    model='gemini-2.0-flash-live-001',
     name='root_agent',
     description='An assistant that check the answer given from the user to the questions of an exam and tells him which chapter he should revise based on the mistakes he made.',
     instruction='''
     Answer to the user by not providing the correct answer to the question,
-    but listing only for each wrongly answered question, along with the specific wrong sentence in the answer.
+    but listing only for each wrongly answered question, along with the specific wrong sentence in the answer,
+    upon request from the user.
     Consider that each question corresponds to a chapter sequentially.
     After that, tell the user which chapter he should revise based on the mistakes he made using the test_the_user tool.
     An answer is to be considered wrong only if it contains some wrong information.
