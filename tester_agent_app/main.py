@@ -33,8 +33,8 @@ load_dotenv()
 APP_NAME = "ADK Streaming example"
 session_service = InMemorySessionService()
 
-# Path to ground truth PDFs
-GROUND_TRUTH_DIR = Path("C:/Users/krysp/Desktop/Hackathon/gdg2025/tester_agent_app/tester_agent/ground_truth")
+# Path to completed exams PDFs
+GROUND_TRUTH_DIR = Path("C:/Users/krysp/Desktop/Hackathon/gdg2025/tester_agent_app/tester_agent/completed_exams")
 
 
 def start_agent_session(session_id: str):
@@ -128,9 +128,9 @@ async def root():
 
 @app.get("/api/ground-truth-pdfs")
 async def get_ground_truth_pdfs():
-    """Returns a list of PDF files in the ground truth directory"""
+    """Returns a list of PDF files in the completed exams directory"""
     try:
-        # Get all PDF files in the ground truth directory
+        # Get all PDF files in the completex exams directory
         pdf_files = []
         for pdf_path in GROUND_TRUTH_DIR.glob("*.pdf"):
             last_modified = datetime.fromtimestamp(pdf_path.stat().st_mtime).isoformat()
@@ -150,7 +150,7 @@ async def get_ground_truth_pdfs():
 async def view_pdf(path: str = Query(...)):
     """Serves a PDF file for viewing"""
     try:
-        # Validate that the path is within the ground truth directory
+        # Validate that the path is within the completed exams directory
         pdf_path = Path(path)
         if GROUND_TRUTH_DIR in pdf_path.parents or pdf_path.parent == GROUND_TRUTH_DIR:
             return FileResponse(
@@ -160,7 +160,7 @@ async def view_pdf(path: str = Query(...)):
             )
         else:
             return JSONResponse(
-                content={"error": "Access denied. File not in ground truth directory."}, 
+                content={"error": "Access denied. File not in completed exams directory."}, 
                 status_code=403
             )
     except Exception as e:
