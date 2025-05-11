@@ -84,19 +84,18 @@ async def tts_google(data : str):
     )
 
     # The response's audio_content is binary.
-    with open("output.mp3", "wb") as out:
+    with open("C:/Users/krysp/Desktop/Hackathon/gdg2025/sochratic_agent/output.mp3", "wb") as out:
         # Write the response to the output file.
         out.write(response.audio_content)
-        print('Audio content written to file "output.mp3"')
+        print('Audio content written to file "C:/Users/krysp/Desktop/Hackathon/gdg2025/sochratic_agent/output.mp3"')
     
-    await play_mp3_async("output.mp3")
+    await play_mp3_async("C:/Users/krysp/Desktop/Hackathon/gdg2025/sochratic_agent/output.mp3")
 
     try:
-        os.remove("output.mp3")
-        print(f"File {"output.mp3"} eliminato.")
+        os.remove("C:/Users/krysp/Desktop/Hackathon/gdg2025/sochratic_agent/output.mp3")
+        print(f"File C:/Users/krysp/Desktop/Hackathon/gdg2025/sochratic_agent/output.mp3 eliminato.")
     except Exception as e:
-        print(f"Errore durante l'eliminazione del file {"output.mp3"}: {e}")
-    
+        print(f"Errore durante l'eliminazione del file C:/Users/krysp/Desktop/Hackathon/gdg2025/sochratic_agent/output.mp3: {e}")    
 
 def record_audio():
     duration=10 
