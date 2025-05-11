@@ -18,6 +18,7 @@
       --border-radius: 8px;
       --box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
       --transition: all 0.3s ease;
+      --sidebar-width: 250px;
     }
 
     * {
@@ -38,6 +39,54 @@
       flex-direction: column;
     }
 
+    .main-content {
+      display: flex;
+      flex-grow: 1;
+    }
+
+    .sidebar {
+      width: var(--sidebar-width);
+      background-color: var(--card-bg);
+      box-shadow: var(--box-shadow);
+      padding: 20px;
+      overflow-y: auto;
+      max-height: calc(100vh - 72px); /* Adjusts for header height */
+      flex-shrink: 0;
+    }
+
+    .sidebar-title {
+      font-size: 18px;
+      color: var(--primary-color);
+      margin-bottom: 16px;
+      padding-bottom: 8px;
+      border-bottom: 1px solid var(--bg-color);
+    }
+
+    .exam-list {
+      list-style: none;
+    }
+
+    .exam-item {
+      padding: 10px;
+      border-radius: var(--border-radius);
+      margin-bottom: 8px;
+      background-color: var(--primary-light);
+      cursor: pointer;
+      transition: var(--transition);
+      font-size: 14px;
+      word-break: break-word;
+    }
+
+    .exam-item:hover {
+      background-color: #dae4f1;
+    }
+
+    .exam-item .date {
+      font-size: 12px;
+      color: var(--light-text);
+      margin-top: 4px;
+    }
+
     .container {
       width: 100%;
       max-width: 800px;
@@ -53,14 +102,14 @@
       color: white;
       padding: 16px 0;
       box-shadow: var(--box-shadow);
-      margin-bottom: 24px;
+      margin-bottom: 0;
     }
 
     .header-content {
       display: flex;
       align-items: center;
       justify-content: space-between;
-      max-width: 800px;
+      max-width: 1200px;
       margin: 0 auto;
       padding: 0 20px;
     }
@@ -202,7 +251,53 @@
       cursor: not-allowed;
     }
 
+    .sidebar-toggle {
+      position: fixed;
+      left: var(--sidebar-width);
+      top: 85px;
+      background-color: var(--primary-color);
+      color: white;
+      border: none;
+      width: 24px;
+      height: 40px;
+      border-radius: 0 var(--border-radius) var(--border-radius) 0;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      z-index: 100;
+      transition: var(--transition);
+    }
+
+    .sidebar-toggle.closed {
+      left: 0;
+    }
+
+    .sidebar.closed {
+      margin-left: calc(-1 * var(--sidebar-width));
+    }
+
+    .no-exams {
+      color: var(--light-text);
+      font-style: italic;
+      text-align: center;
+      padding: 20px 0;
+    }
+
     @media (max-width: 768px) {
+      .main-content {
+        position: relative;
+      }
+
+      .sidebar {
+        position: absolute;
+        top: 0;
+        left: 0;
+        height: 100%;
+        z-index: 10;
+        transition: var(--transition);
+      }
+
       .container {
         padding: 12px;
       }
@@ -229,22 +324,35 @@
     </div>
   </header>
 
-  <div class="container">
-    <div class="chat-container">
-      <div class="chat-header">
-        <span>ADK Streaming Test</span>
+  <div class="main-content">
+    <aside class="sidebar" id="sidebar">
+      <h2 class="sidebar-title">Ground Truth PDFs</h2>
+      <ul class="exam-list" id="examList">
+        <li class="no-exams">Loading PDF files...</li>
+      </ul>
+    </aside>
+    
+    <button class="sidebar-toggle" id="sidebarToggle">
+      &lt;
+    </button>
+
+    <div class="container">
+      <div class="chat-container">
+        <div class="chat-header">
+          <span>ADK Streaming Test</span>
+        </div>
+        <div id="messages"></div>
+        <form id="messageForm">
+          <input 
+            type="text" 
+            id="message" 
+            name="message" 
+            placeholder="Type your message..." 
+            autocomplete="off"
+          />
+          <button type="submit" id="sendButton" disabled>Send</button>
+        </form>
       </div>
-      <div id="messages"></div>
-      <form id="messageForm">
-        <input 
-          type="text" 
-          id="message" 
-          name="message" 
-          placeholder="Type your message..." 
-          autocomplete="off"
-        />
-        <button type="submit" id="sendButton" disabled>Send</button>
-      </form>
     </div>
   </div>
 
@@ -261,8 +369,81 @@
     const sendButton = document.getElementById("sendButton");
     const connectionStatus = document.getElementById("connectionStatus");
     const connectionText = document.getElementById("connectionText");
+    const sidebar = document.getElementById("sidebar");
+    const sidebarToggle = document.getElementById("sidebarToggle");
+    const examList = document.getElementById("examList");
     
     let currentMessageId = null;
+    let sidebarOpen = true;
+
+    // Toggle sidebar
+    sidebarToggle.addEventListener("click", function() {
+      sidebar.classList.toggle("closed");
+      sidebarToggle.classList.toggle("closed");
+      sidebarOpen = !sidebarOpen;
+      sidebarToggle.textContent = sidebarOpen ? "<" : ">";
+    });
+
+    // Fetch ground truth PDFs
+    function fetchGroundTruthPDFs() {
+      fetch('/api/ground-truth-pdfs')
+        .then(response => response.json())
+        .then(data => {
+          updatePDFsList(data);
+        })
+        .catch(error => {
+          console.error('Error fetching ground truth PDFs:', error);
+          examList.innerHTML = `<li class="no-exams">Error loading PDF files.</li>`;
+        });
+    }
+
+    // Update the PDFs list in the sidebar
+    function updatePDFsList(pdfs) {
+      if (!pdfs || pdfs.length === 0) {
+        examList.innerHTML = `<li class="no-exams">No PDF files found.</li>`;
+        return;
+      }
+
+      // Sort PDFs by date (newest first)
+      pdfs.sort((a, b) => new Date(b.lastModified) - new Date(a.lastModified));
+      
+      // Clear and repopulate the list
+      examList.innerHTML = '';
+      
+      pdfs.forEach(pdf => {
+        const li = document.createElement('li');
+        li.className = 'exam-item';
+        
+        // Format the date
+        const pdfDate = new Date(pdf.lastModified);
+        const formattedDate = pdfDate.toLocaleString();
+        
+        li.innerHTML = `
+          ${pdf.name}
+          <div class="date">${formattedDate}</div>
+        `;
+        
+        // Add click handler
+        li.addEventListener('click', () => {
+          viewPDF(pdf.path);
+        });
+        
+        examList.appendChild(li);
+      });
+    }
+
+    // View PDF when clicked
+    function viewPDF(path) {
+      // Create a URL for the PDF file
+      const url = `/api/view-pdf?path=${encodeURIComponent(path)}`;
+      
+      // Add message to chat
+      const filename = path.split('\\').pop();
+      addMessage(`Opening PDF: ${filename}`, "status");
+      
+      // Open PDF in new tab
+      window.open(url, '_blank');
+    }
 
     // Add a message to the chat
     function addMessage(text, type) {
@@ -311,6 +492,9 @@
         updateConnectionStatus(true);
         addMessage("Connection established", "status");
         addSubmitHandler(this);
+        
+        // Fetch ground truth PDFs when connection is established
+        fetchGroundTruthPDFs();
       };
 
       ws.onmessage = function (event) {
@@ -372,6 +556,9 @@
         return false;
       };
     }
+
+    // Auto-refresh ground truth PDFs list every 30 seconds
+    setInterval(fetchGroundTruthPDFs, 30000);
 
     // Focus input on page load
     window.onload = function() {

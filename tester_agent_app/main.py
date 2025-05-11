@@ -1,6 +1,8 @@
 import os
 import json
 import asyncio
+import glob
+from datetime import datetime
 
 from pathlib import Path
 from dotenv import load_dotenv
@@ -15,9 +17,9 @@ from google.adk.agents import LiveRequestQueue
 from google.adk.agents.run_config import RunConfig
 from google.adk.sessions.in_memory_session_service import InMemorySessionService
 
-from fastapi import FastAPI, WebSocket
+from fastapi import FastAPI, WebSocket, Query
 from fastapi.staticfiles import StaticFiles
-from fastapi.responses import FileResponse
+from fastapi.responses import FileResponse, JSONResponse
 
 from tester_agent.agent import root_agent
 
@@ -30,6 +32,9 @@ load_dotenv()
 
 APP_NAME = "ADK Streaming example"
 session_service = InMemorySessionService()
+
+# Path to ground truth PDFs
+GROUND_TRUTH_DIR = Path("C:/Users/krysp/Desktop/Hackathon/gdg2025/tester_agent_app/tester_agent/ground_truth")
 
 
 def start_agent_session(session_id: str):
@@ -119,6 +124,48 @@ app.mount("/static", StaticFiles(directory=STATIC_DIR), name="static")
 async def root():
     """Serves the index.html"""
     return FileResponse(os.path.join(STATIC_DIR, "index.html"))
+
+
+@app.get("/api/ground-truth-pdfs")
+async def get_ground_truth_pdfs():
+    """Returns a list of PDF files in the ground truth directory"""
+    try:
+        # Get all PDF files in the ground truth directory
+        pdf_files = []
+        for pdf_path in GROUND_TRUTH_DIR.glob("*.pdf"):
+            last_modified = datetime.fromtimestamp(pdf_path.stat().st_mtime).isoformat()
+            pdf_files.append({
+                "name": pdf_path.name,
+                "path": str(pdf_path),
+                "lastModified": last_modified
+            })
+        
+        return JSONResponse(content=pdf_files)
+    except Exception as e:
+        print(f"Error getting PDFs: {e}")
+        return JSONResponse(content={"error": str(e)}, status_code=500)
+
+
+@app.get("/api/view-pdf")
+async def view_pdf(path: str = Query(...)):
+    """Serves a PDF file for viewing"""
+    try:
+        # Validate that the path is within the ground truth directory
+        pdf_path = Path(path)
+        if GROUND_TRUTH_DIR in pdf_path.parents or pdf_path.parent == GROUND_TRUTH_DIR:
+            return FileResponse(
+                path=path,
+                media_type="application/pdf",
+                filename=pdf_path.name
+            )
+        else:
+            return JSONResponse(
+                content={"error": "Access denied. File not in ground truth directory."}, 
+                status_code=403
+            )
+    except Exception as e:
+        print(f"Error serving PDF: {e}")
+        return JSONResponse(content={"error": str(e)}, status_code=500)
 
 
 @app.websocket("/ws/{session_id}")
