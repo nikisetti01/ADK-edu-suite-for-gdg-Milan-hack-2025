@@ -62,6 +62,36 @@ header h1 {
   gap: 0.5rem;
 }
 
+.header-buttons {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+}
+
+.evaluate-button {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.5rem 1rem;
+  background-color: var(--secondary-color);
+  color: white;
+  border-radius: 2rem;
+  text-decoration: none;
+  font-weight: 500;
+  transition: var(--transition);
+  box-shadow: var(--shadow-sm);
+}
+
+.evaluate-button:hover {
+  background-color: #0ea271;
+  transform: translateY(-2px);
+  box-shadow: var(--shadow-md);
+}
+
+.evaluate-button:active {
+  transform: translateY(0);
+}
+
 .status {
   display: flex;
   align-items: center;
@@ -543,6 +573,11 @@ footer {
     gap: 0.5rem;
     align-items: flex-start;
   }
+
+  .header-buttons {
+    width: 100%;
+    justify-content: space-between;
+  }
   
   .message {
     max-width: 90%;
@@ -563,6 +598,11 @@ footer {
 }
 
 @media (max-width: 480px) {
+  .evaluate-button {
+    padding: 0.4rem 0.75rem;
+    font-size: 0.875rem;
+  }
+
   .message {
     max-width: 100%;
   }
