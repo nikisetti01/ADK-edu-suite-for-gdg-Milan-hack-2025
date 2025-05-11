@@ -19,11 +19,7 @@ from fastapi import FastAPI, WebSocket
 from fastapi.staticfiles import StaticFiles
 from fastapi.responses import FileResponse
 
-from fastapi import FastAPI
-from fastapi.staticfiles import StaticFiles
-
-
-from sochratic_agenty.agent import root_agent
+from sochratic_agent.sochratic_agenty.agent import root_agent
 
 #
 # ADK Streaming
@@ -34,9 +30,6 @@ load_dotenv()
 
 APP_NAME = "ADK Streaming example"
 session_service = InMemorySessionService()
-app = FastAPI()
-
-
 
 
 def start_agent_session(session_id: str):
@@ -119,7 +112,7 @@ async def client_to_agent_messaging(websocket, live_request_queue):
 app = FastAPI()
 
 STATIC_DIR = Path("static")
-app.mount("/static", StaticFiles(directory=STATIC_DIR, html=True), name="static")
+app.mount("/static", StaticFiles(directory=STATIC_DIR), name="static")
 
 
 @app.get("/")

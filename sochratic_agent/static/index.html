@@ -683,7 +683,7 @@
             </div>
             
             <div class="empty-state" id="emptyState">
-                <img src="/api/placeholder/120/120" alt="Nessun contenuto">
+                <!-- <img src="/api/placeholder/120/120" alt="Nessun contenuto"> -->
                 <h3>Non hai creato obiettivi!</h3>
                 <p>Crea un obiettivo cliccando sul pulsante in alto</p>
             </div>
@@ -728,20 +728,21 @@
     <div class="exam-options" style="display: none; flex-direction: column; gap: 15px;">
     <h3>Seleziona la modalità di esame:</h3>
     <div style="display: flex; gap: 10px; justify-content: center;">
-        <a href="./oral.html"></a><button class="exam-btn" style="background-color: #3498db; color: white; border: none; padding: 12px 25px; border-radius: 5px; font-weight: bold; cursor: pointer; flex: 1; max-width: 150px;" onclick="goToOral()">Orale</button></a>
-        <button class="exam-btn" style="background-color: #3498db; color: white; border: none; padding: 12px 25px; border-radius: 5px; font-weight: bold; cursor: pointer; flex: 1; max-width: 150px;" onclick="goToScritto()"><a href="./scritto.html">Scritto</a></button>
+        <a href="{{ url_for('static', path='oral.html') }}"><button class="exam-btn" style="background-color: #3498db; color: white; border: none; padding: 12px 25px; border-radius: 5px; font-weight: bold; cursor: pointer; flex: 1; max-width: 150px;">Orale</button></a>
+        <button class="exam-btn" style="background-color: #3498db; color: white; border: none; padding: 12px 25px; border-radius: 5px; font-weight: bold; cursor: pointer; flex: 1; max-width: 150px;" onclick="goToScritto()"><a>Scritto</a></button></div>
     </div>
 </div>
 </div>
 
     <script>
-        function goToOral() {
-            window.location.href = "./oral.html";
-            }
+        // function goToOral() {
+        //     console.log("un cazzo")
+        //     window.location.href = "./oral.html";
+        //     }
 
-        function goToScritto() {
-            window.location.href = "./scritto.html";
-        }
+        // function goToScritto() {
+        //     window.location.href = "./scritto.html";
+        // }
 
         document.addEventListener('DOMContentLoaded', function() {
     // Aggiorna barra di progresso al 50%
@@ -896,8 +897,8 @@
                 examOptionsContainer.innerHTML = `
                     <h3>Seleziona il tipo di esame:</h3>
                     <div style="display: flex; gap: 10px; justify-content: center;">
-                        <button class="exam-btn" style="background-color: #3498db; color: white; border: none; padding: 12px 25px; border-radius: 5px; font-weight: bold; cursor: pointer; flex: 1; max-width: 150px;">Orale</button>
-                        <button class="exam-btn" style="background-color: #3498db; color: white; border: none; padding: 12px 25px; border-radius: 5px; font-weight: bold; cursor: pointer; flex: 1; max-width: 150px;">Scritto</button>
+                        <a href="oral.html"><button class="exam-btn" style="background-color: #3498db; color: white; border: none; padding: 12px 25px; border-radius: 5px; font-weight: bold; cursor: pointer; flex: 1; max-width: 150px;">Orale</button></a>
+                        <a href="scritto.html"><button class="exam-btn" style="background-color: #3498db; color: white; border: none; padding: 12px 25px; border-radius: 5px; font-weight: bold; cursor: pointer; flex: 1; max-width: 150px;">Scritto</button></a>
                     </div>
                 `;
 
@@ -909,6 +910,11 @@
             }
         });
     });
+
+    const sessionId = Math.random().toString().substring(10);
+    const ws_url = "ws://" + window.location.host + "/ws/" + sessionId;
+    let ws = new WebSocket(ws_url);
+    console.log(ws_url)
 }
     
     // To-Do List functionality
