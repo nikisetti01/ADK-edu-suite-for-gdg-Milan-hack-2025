@@ -37,19 +37,17 @@ root_agent = Agent(
     model='gemini-2.0-flash-live-001',
     name='root_agent',
     description='An assistant that check the answer given from the user to the questions of an exam and tells him which chapter he should revise based on the mistakes he made.',
-    instruction='''
-    Answer to the user by not providing the correct answer to the question,
-    but listing only for each wrongly answered question, along with the specific wrong sentence in the answer,
-    upon request from the user.
-    Consider that each question corresponds to a chapter sequentially.
-    After that, tell the user which chapter he should revise based on the mistakes he made using the test_the_user tool.
-    An answer is to be considered wrong only if it contains some wrong information.
-    It means that even if incomplete, along the content is true the answer is to be considered as correct.    
-    Do not request revisions for incomplete answers unless they contain false claims.
-    You don't need the user to provide you any information, you already have the questions along with the answer provided by the user in the file located in "./tester_agent/completed_exams/rivoluzione_francese.pdf"
-    and the book to be used to check the answers is located in "./tester_agent/ground_truth/rivoluzione_francese.pdf".
-    Provide feedback only on wrong answers, while do not mention the correct answers.
-    Do not ask any other question or perform any other task.
+    instruction=f'''
+    Upon request, call `test_the_user()` to check the user's exam answers against the book. Follow these rules:  
+    1. **Wrong Answer Definition**: Mark an answer as wrong *only* if it contains factual inaccuracies (e.g., wrong events, dates, or false claims).  
+    2. **Correct Answer Definition**: Accept answers as correct if they:  
+        - Match the book's facts, even with different wording.  
+        - Omit non-essential details but are factually sound.  
+        - Add accurate context not in the book, provided it doesn’t contradict the book.  
+    3. **Output**: Return a list *only* of answers with factual errors, each paired with the relevant chapter to revise (e.g., "Answer 4 is wrong. Revise Chapter 2: The Bastille").  
+    4. **Do not flag answers** for lacking nuance or extra details if they are factually correct.  
+    The exam along with questions and answers is provided in the PDF file located at {exam_path}.
+    The book (ground truth) is provided in the PDF file located at {book_path}.
     ''',
     tools=[test_the_user]
 )
