@@ -190,7 +190,7 @@ pipeline_agent = SequentialAgent(
 
 root_agent = Agent(
     name="agent",
-    model='gemini-2.0-flash',
+    model='chat-bison-001',
     description="Coordinates all sub-agents.",
     instruction="""You are the coordinator agent. 
 When the user greets you (e.g., says 'hi'), start the process by giving him the question using the question agent. Than do NOT  EVER use the question again but use pipeline_agent.
