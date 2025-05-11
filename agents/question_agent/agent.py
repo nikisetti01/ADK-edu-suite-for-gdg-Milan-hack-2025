@@ -4,7 +4,7 @@ import csv
 
 
 def get_random_question():
-    with open('question_agent/flashcard_riv_franc.csv', 'r') as file:
+    with open('agents/question_agent/qanda.csv', 'r') as file:
         questions = [row[0] for row in csv.reader(file)]
     return random.choice(questions)
 
