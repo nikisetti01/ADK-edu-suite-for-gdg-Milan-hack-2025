@@ -19,7 +19,7 @@ from fastapi import FastAPI, WebSocket
 from fastapi.staticfiles import StaticFiles
 from fastapi.responses import FileResponse
 
-from sochratic_agent.sochratic_agenty.agent import root_agent
+from sochratic_agenty.agent import root_agent
 
 #
 # ADK Streaming
